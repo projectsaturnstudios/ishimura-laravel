@@ -19,18 +19,40 @@ final class ServiceProvider extends BaseServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(Client::class, static function (): Client {
-            $apiKey = config('openai.api_key');
+        $openai = $this->app->singleton(Client::class, static function (): Client {
+            $apiKey = config('openai.openai_api_key');
             $organization = config('openai.organization');
 
             if (! is_string($apiKey) || ($organization !== null && ! is_string($organization))) {
                 throw ApiKeyIsMissing::create();
             }
 
-            return OpenAI::client($apiKey, $organization);
+            return OpenAI::client($apiKey, 'api.openai.com/v1', $organization);
         });
 
-        $this->app->alias(Client::class, 'openai');
+        $gooseai = $this->app->singleton(Client::class, static function (): Client {
+            $apiKey = config('openai.goose_api_key');
+            //$organization = config('openai.organization');
+
+            if (! is_string($apiKey) /*|| ($organization !== null && ! is_string($organization))*/) {
+                throw ApiKeyIsMissing::create();
+            }
+
+            return OpenAI::client($apiKey, 'api.goose.ai/v1', null, [
+                'completions' => true,
+                'edits' => false,
+                'embeddings' => false,
+                'files' => false,
+                'fine_tunes' => false,
+                'images' => false,
+                'models' => false,
+                'engines' => true,
+                'moderations' => false,
+            ]);
+        });
+        
+        $this->app->alias($openai, 'openai');
+        $this->app->alias($gooseai, 'goose');
     }
 
     /**
