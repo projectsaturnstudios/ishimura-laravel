@@ -6,7 +6,8 @@ namespace OpenAI\Laravel;
 
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use OpenAI;
-use OpenAI\Client;
+use OpenAI\OpenAIClient;
+use OpenAI\GooseAIClient;
 use OpenAI\Laravel\Exceptions\ApiKeyIsMissing;
 
 /**
@@ -19,7 +20,7 @@ final class ServiceProvider extends BaseServiceProvider
      */
     public function register(): void
     {
-        $openai = $this->app->singleton(Client::class, static function (): Client {
+        $this->app->singleton(OpenAIClient::class, static function (): OpenAIClient {
             $apiKey = config('openai.openai_api_key');
             $organization = config('openai.organization');
 
@@ -30,7 +31,7 @@ final class ServiceProvider extends BaseServiceProvider
             return OpenAI::client($apiKey, 'api.openai.com/v1', $organization);
         });
 
-        $gooseai = $this->app->singleton(Client::class, static function (): Client {
+        $this->app->singleton(GooseAIClient::class, static function (): GooseAIClient {
             $apiKey = config('openai.goose_api_key');
             //$organization = config('openai.organization');
 
@@ -50,7 +51,7 @@ final class ServiceProvider extends BaseServiceProvider
                 'moderations' => false,
             ]);
         });
-        
+
         $this->app->alias($openai, 'openai');
         $this->app->alias($gooseai, 'goose');
     }
