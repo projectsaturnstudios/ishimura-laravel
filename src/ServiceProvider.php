@@ -52,8 +52,8 @@ final class ServiceProvider extends BaseServiceProvider
             ]);
         });
 
-        $this->app->alias($openai, 'openai');
-        $this->app->alias($gooseai, 'goose');
+        $this->app->alias(OpenAIClient::class, 'openai');
+        $this->app->alias(GooseAIClient::class, 'goose');
     }
 
     /**
